@@ -249,7 +249,7 @@ void Fill_A(const int& lenX, tensor2<double>* Fp,tensor2<double>* Fv,tensor2<dou
 // --------------------------------------------------------------
 
 /**
- * @brief Completes the initial timestep
+ * @brief Completes the initial time integral
  * 
  * @param lenX 
  * @param A 
@@ -257,11 +257,11 @@ void Fill_A(const int& lenX, tensor2<double>* Fp,tensor2<double>* Fv,tensor2<dou
  * @param V 
  * @param tstep 
  */
-void Tstep_init(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep);
+void Tintegrate_init(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep);
 
 
 /**
- * @brief Competes a timestep
+ * @brief Competes a time integral
  * 
  * @param lenX 
  * @param A 
@@ -269,7 +269,7 @@ void Tstep_init(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2
  * @param V 
  * @param tstep 
  */
-void Tstep(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep);
+void Tintegrate(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep);
 
 /**
  * @brief Enforces Boundary Conditions

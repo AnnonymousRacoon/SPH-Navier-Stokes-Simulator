@@ -29,7 +29,7 @@ double phi_dij(tensor2<double> xi,tensor2<double> xj,const double& h){
     if (q >=1.0){
         return 0.0;
     }
-    return 4.0*pow(1.0-q*q,3)/(M_PI*h*h);
+    return 4.0*pow((1.0-q*q),3)/(M_PI*h*h);
 }
 
 double grad2_phi_vij(tensor2<double> xi,tensor2<double> xj,const double& h){
@@ -158,7 +158,7 @@ void Fill_A(const int& lenX, tensor2<double>* Fp,tensor2<double>* Fv,tensor2<dou
 //                       TIMESTEPS
 // --------------------------------------------------------------
  
-void Tstep_init(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep){
+void Tintegrate_init(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep){
     for (int idx = 0; idx < lenX; idx++){
         V[idx] +=A[idx]*tstep/2.0;
         X[idx] += V[idx]*tstep;
@@ -166,7 +166,7 @@ void Tstep_init(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2
 }
 
 
-void Tstep(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep){
+void Tintegrate(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep){
     for (int idx = 0; idx < lenX; idx++){
         V[idx] +=A[idx]*tstep;
         X[idx] += V[idx]*tstep;
