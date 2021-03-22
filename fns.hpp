@@ -15,6 +15,16 @@
  */
 double qij(tensor2<double> xi,tensor2<double> xj, const double& h);
 
+/**
+ * @brief Scales m
+ * 
+ * @param lenX 
+ * @param Rho 
+ * @param rho0 
+ * @param m 
+ */
+void scale_m(const int& lenX, double* Rho, const double& rho0, double& m);
+
 
 // --------------------------------------------------------------
 // --------------------------------------------------------------
@@ -238,9 +248,39 @@ void Fill_A(const int& lenX, tensor2<double>* Fp,tensor2<double>* Fv,tensor2<dou
 // --------------------------------------------------------------
 // --------------------------------------------------------------
 
+/**
+ * @brief Completes the initial timestep
+ * 
+ * @param lenX 
+ * @param A 
+ * @param X 
+ * @param V 
+ * @param tstep 
+ */
+void Tstep_init(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep);
 
 
+/**
+ * @brief Competes a timestep
+ * 
+ * @param lenX 
+ * @param A 
+ * @param X 
+ * @param V 
+ * @param tstep 
+ */
+void Tstep(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2<double>* V, const double& tstep);
 
+/**
+ * @brief Enforces Boundary Conditions
+ * 
+ * @param lenX 
+ * @param X 
+ * @param V 
+ * @param e 
+ * @param h 
+ */
+void EnforceBC(const int& lenX, tensor2<double>* X, tensor2<double>* V, const double& e, const double& h);
 
 
 

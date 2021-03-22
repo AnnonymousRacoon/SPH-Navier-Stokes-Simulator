@@ -2,9 +2,27 @@
 #include <math.h>
 // #include "tensor.h"
 
+// --------------------------------------------------------------
+//                       MISC
+// --------------------------------------------------------------
+
 double qij(tensor2<double> xi,tensor2<double> xj,const double& h){
     return (xi-xj).norm()/h;
 }
+
+void scale_m(const int& lenX, double* Rho, const double& rho0, double& m){
+    double sum = 0.0;
+    for (int idx = 0; idx< lenX; idx++){
+        sum+=Rho[idx];
+    }
+    m = sqrt(rho0*double(lenX)/sum);
+
+
+}
+
+// --------------------------------------------------------------
+//                       PHI DERIVATIVES 
+// --------------------------------------------------------------
 
 double phi_dij(tensor2<double> xi,tensor2<double> xj,const double& h){
     double q = qij(xi,xj,h);
@@ -31,7 +49,9 @@ tensor2<double> grad_phi_pij(tensor2<double> xi, tensor2<double> xj,const double
     return rij*(-30.0*pow(1.0-q,2)/(M_PI*h*h*h*q));
 }
 
-
+// --------------------------------------------------------------
+//                       Pressure and Density
+// --------------------------------------------------------------
 
 double rho_i(const int& i, const int& lenX,  tensor2<double>* X, const double& m, const double& h){
     double sum = 0.0;
@@ -59,6 +79,9 @@ tensor2<double> Fp_i(const int& i, const int& lenX,  tensor2<double>* X, double*
     return sum;
 }
 
+// --------------------------------------------------------------
+//                       FORCES
+// --------------------------------------------------------------
 
 tensor2<double> Fv_i(const int& i, const int& lenX,  tensor2<double>* X, tensor2<double>* V, double* Rho,const double& m, const double& h, const double& mu){
     tensor2<double> sum(0.0,0.0);

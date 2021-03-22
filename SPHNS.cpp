@@ -23,10 +23,10 @@ int main(){
 
 
     const double h = sqrt(2)*0.5;
-    const double m = 1.0;
+    double m = 1.0;
     const int len = 6;
     const double k = 1.0;
-    const double rho0 = 0.0;
+    const double rho0 = 1000.0;
     const double g = 9.81;
     const double mu = 1.0;
 
@@ -86,6 +86,9 @@ int main(){
 
     
     Fill_Rho(len,X,Rho,m,h);
+    scale_m(len,Rho,rho0,m);
+    std::cout<<"scaled mass: "<<m<<std::endl;
+
     Fill_P(len,X,Rho,P,k,rho0);
     Fill_Fp(len,X,P,Rho,Fp,m,h);
     Fill_Fv(len,X,V,Rho,Fv,m,h,mu);
@@ -108,10 +111,7 @@ int main(){
     std::cout<<"GRAVITATIONAL FORCE:\n";
     print_arr(len,Fg);
    
-    std::cout<<"INTERACTION RADIUS: "<<qij(p0,p1,h)<<"\nPHI_d: "<<phi_dij(p0,p1,h)<<std::endl;
-    std::cout<<"INTERACTION RADIUS: "<<qij(p0,p2,h)<<"\nPHI_d: "<<phi_dij(p0,p2,h)<<std::endl;
-    std::cout<<"INTERACTION RADIUS: "<<qij(p0,p0,h)<<"\nPHI_d: "<<phi_dij(p0,p0,h)<<std::endl;
-    std::cout<<"particle density of particle 0: "<<rho_i(0,3,X,1.0,h)<<std::endl;
+    
 
 
 
