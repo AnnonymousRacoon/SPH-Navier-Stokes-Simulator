@@ -49,6 +49,8 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
     //     INITIAL CONDITIONS
     //-----------------------
 
+    std::string delim = ",";//output file deliminator
+
 
     Fill_Rho(len,X,Rho,m,h);
     scale_m(len,Rho,rho0,m);
@@ -66,7 +68,8 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
     print_arr(len,X);
 
     //SAVE DATA AND ADD HEAD
-    save_data(len,X,0.0,",",true,false);
+    save_position(len,X,0.0,delim,true,false);
+    
 
 
     //-----------------------
@@ -79,6 +82,13 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
     print_arr(len,V);
     std::cout<<"POSITIONS:\n";
     print_arr(len,X);
+    std::cout<<"POTENTIAL ENERGY:\n";
+    std::cout<<Ep(len,X,m,g)<<std::endl;
+
+    // SAVE ENERGY AND ADD HEAD
+    save_energy(Ek(len,V,m),Ep(len,X,m,g),step,delim,true,false);
+
+    
 
     
 
@@ -100,43 +110,38 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
         
         Tintegrate(len,A,X,V,step);
         EnforceBC(len,X,V,e,h);
+
+
+        if(t%1000 == 0){
+            save_energy(Ek(len,V,m),Ep(len,X,m,g),t*step,delim,false,false);
+        }
         if(t%10000 == 0){
-            std::cout<<"\n\nt =  "<<t*step<<"s"<<std::endl;
+            std::cout<<"\nt =  "<<t*step<<"s"<<std::endl;
             std::cout<<"VELOCITIES:\n";
             print_arr(len,V);
             std::cout<<"POSITIONS:\n";
             print_arr(len,X);
             std::cout<<"NET SCALED FORCE:\n";
             print_arr(len,A);
+            // std::cout<<"KINETIC ENERGY:\n";
+            // std::cout<<Ek(len,V,m)<<std::endl;
+            std::cout<<"POTENTIAL ENERGY:\n";
+            std::cout<<Ep(len,X,m,g)<<std::endl;
 
             //SAVE DATA
-            save_data(len,X,t*step,",",false,false);
+            save_position(len,X,t*step,delim,false,false);
+
+
+
         }
         
 
 
-        //------------------
-        //  PRINT INTERACTIONS
-        //-------------------
 
-        // for(int p = 0; p<len; p++){
-        //     if(A[p].x1() != 0){
-        //     std::cout<<"\n\n***INTERACTION***:\n";
-        //     std::cout<<"t =  "<<t/10000<<"s"<<std::endl;
-        //     std::cout<<"VELOCITIES:\n";
-        //     print_arr(len,V);
-        //     std::cout<<"POSITIONS:\n";
-        //     print_arr(len,X);
-        //     std::cout<<"NET SCALED FORCE:\n";
-        //     print_arr(len,A);
-        //     break;
-
-        //     }
-        // }
         
 
     }
-    save_data(len,X,sim_time,",",false,true);
+    save_position(len,X,sim_time,",",false,true);
 
 }
 

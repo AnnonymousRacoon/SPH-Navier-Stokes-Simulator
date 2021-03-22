@@ -25,19 +25,42 @@ double qij(tensor2<double> xi,tensor2<double> xj, const double& h);
  */
 void scale_m(const int& lenX, double* Rho, const double& rho0, double& m);
 
+// --------------------------------------------------------------
+// --------------------------------------------------------------
+// --------------------------------------------------------------
+//                          SAVING DATA
+// --------------------------------------------------------------
+// --------------------------------------------------------------
+// --------------------------------------------------------------
 
 
 
 /**
- * @brief Saves temp data into temp
+ * @brief Saves position data into file
  * 
  * @param lenX 
  * @param X 
  * @param timestamp 
  * @param delim deliminator: " " or ",". Space separated values will output to .txt whilst Comma separated will output .csv
  * @param New 
+ * @param Close Close file when done
  */
-void save_data(const int& lenX, tensor2<double>* X,const double& timestamp, const std::string& delim, const bool& New, const bool& Close);
+void save_position(const int& lenX, tensor2<double>* X,const double& timestamp, const std::string& delim, const bool& New, const bool& Close);
+
+
+
+
+/**
+ * @brief Saves Energy data into file
+ * 
+ * @param KE 
+ * @param PE 
+ * @param timestamp 
+ * @param delim 
+ * @param Open 
+ * @param Close 
+ */
+void save_energy(const double& KE, const double& PE, const double& timestamp, const std::string& delim, const bool& Open, const bool& Close);
 // --------------------------------------------------------------
 // --------------------------------------------------------------
 // --------------------------------------------------------------
@@ -294,6 +317,30 @@ void Tintegrate(const int& lenX, tensor2<double>* A, tensor2<double>* X, tensor2
  */
 void EnforceBC(const int& lenX, tensor2<double>* X, tensor2<double>* V, const double& e, const double& h);
 
+
+
+/**
+ * @brief Calculates the system Kinetic energy
+ * 
+ * @param lenX 
+ * @param V 
+ * @param m 
+ * @return double 
+ */
+double Ek(const int& lenX, tensor2<double>* V, const double& m);
+
+
+
+/**
+ * @brief Calculates the system potential energy
+ * 
+ * @param lenX 
+ * @param X 
+ * @param m 
+ * @param g 
+ * @return double 
+ */
+double Ep(const int& lenX, tensor2<double>* X, const double& m,const double& g);
 
 
 // --------------------------------------------------------------

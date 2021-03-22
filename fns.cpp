@@ -23,47 +23,80 @@ void scale_m(const int& lenX, double* Rho, const double& rho0, double& m){
 
 }
 
-void save_data(const int& lenX, tensor2<double>* X,const double& timestamp, const std::string& delim, const bool& Open, const bool& Close){
+// --------------------------------------------------------------
+//                       SAVING DATA
+// --------------------------------------------------------------
+
+void save_position(const int& lenX, tensor2<double>* X,const double& timestamp, const std::string& delim, const bool& Open, const bool& Close){
     std::string ext = (delim == ",")? ".csv" : ".txt";//file extension
-    std::string fname = "temp";//filename
+    std::string pfname = "output";//position filename
     // create new file
-    std::ofstream outFile;
+    std::ofstream PositionFile;
+    
+    //-----------------------
+    //   OPEN FILE AND FORMAT
+    //----------------------
+
+    if(Open){//OVERWRITE AND ADD HEADER
+        PositionFile.open(pfname+ext);
+        PositionFile<<"Timestamp(s)"<<delim;
+
+        for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
+            PositionFile <<"px"<<particle_idx << delim;
+        }
+        for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
+            PositionFile <<"py"<<particle_idx << ((particle_idx<lenX-1)? delim: "\n");
+
+        }
+    }else{//PARSE TO END BEFORE BEGINING WRITE
+        PositionFile.open(pfname+ext,std::ios_base::app);
+    }
+
+    //-----------------
+    //    WRITE DATA
+    //-----------------
+    PositionFile<<timestamp<<delim;
+
+    for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
+        PositionFile << X[particle_idx].x1() << delim;
+
+    }
+    for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
+        PositionFile << X[particle_idx].x2() << ((particle_idx<lenX-1)? delim: "\n");
+
+    }
+
+
+    //-----------------
+    //    CLOSE
+    //-----------------
+    if (Close){
+        PositionFile.close();
+    }
+    
+}
+
+void save_energy(const double& KE, const double& PE, const double& timestamp, const std::string& delim, const bool& Open, const bool& Close){
+    std::string ext = (delim == ",")? ".csv" : ".txt";//file extension
+    std::string pfname = "energy";//position filename
+    // create new file
+    std::ofstream NRGFile;
     
 
-    if(Open){
-        outFile.open(fname+ext);
-        outFile<<"Timestamp"<<delim;
+    if(Open){//OVERWRITE AND ADD HEADER
+        NRGFile.open(pfname+ext);
+        NRGFile<<"Timestamp(s)"<<delim<<"KE"<<delim<<"PE\n";
 
-        for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
-            outFile <<"px"<<particle_idx << delim;
-        }
-        for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
-            outFile <<"py"<<particle_idx << ((particle_idx<lenX-1)? delim: "\n");
-
-        }
-    }else{
-        outFile.open(fname+ext,std::ios_base::app);
+    }else{//PARSE TO END BEFORE BEGINING WRITE
+        NRGFile.open(pfname+ext,std::ios_base::app);
     }
-
-    outFile<<timestamp<<delim;
-
-    for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
-        outFile << X[particle_idx].x1() << delim;
-
-    }
-    for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
-        outFile << X[particle_idx].x2() << ((particle_idx<lenX-1)? delim: "\n");
-
-    }
-
+    //WRITE DATA
+    NRGFile<<timestamp<<delim<<std::setprecision(8)<<KE<<delim<<std::setprecision(8)<<PE<<"\n";
 
     //close
     if (Close){
-        outFile.close();
+        NRGFile.close();
     }
-    
-
-
 }
 
 // --------------------------------------------------------------
@@ -243,4 +276,32 @@ void EnforceBC(const int& lenX, tensor2<double>* X, tensor2<double>* V, const do
         }
     }
     
+}
+
+
+// --------------------------------------------------------------
+//                       ENERGIES
+// --------------------------------------------------------------
+
+double Ek(const int& lenX, tensor2<double>* V, const double& m){
+    double sum = 0.0;
+    for (int idx = 0; idx < lenX; idx++){
+        sum+=pow(V[idx].norm(),2);
+    }
+
+    return 0.5*m*sum;
+
+
+}
+
+
+double Ep(const int& lenX, tensor2<double>* X, const double& m,const double& g){
+    double sum = 0.0;
+    for (int idx = 0; idx < lenX; idx++){
+        sum+=X[idx].x2();
+    }
+
+    return m*0.5*g*sum;
+
+
 }
