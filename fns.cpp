@@ -1,6 +1,9 @@
 #include "fns.hpp"
 #include <math.h>
-// #include "tensor.h"
+#include <fstream>
+#include <sstream>
+#include <string>
+
 
 // --------------------------------------------------------------
 //                       MISC
@@ -16,6 +19,49 @@ void scale_m(const int& lenX, double* Rho, const double& rho0, double& m){
         sum+=Rho[idx];
     }
     m = sqrt(rho0*double(lenX)/sum);
+
+
+}
+
+void save_data(const int& lenX, tensor2<double>* X,const double& timestamp, const std::string& delim, const bool& Open, const bool& Close){
+    std::string ext = (delim == ",")? ".csv" : ".txt";//file extension
+    std::string fname = "temp";//filename
+    // create new file
+    std::ofstream outFile;
+    
+
+    if(Open){
+        outFile.open(fname+ext);
+        outFile<<"Timestamp"<<delim;
+
+        for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
+            outFile <<"px"<<particle_idx << delim;
+        }
+        for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
+            outFile <<"py"<<particle_idx << ((particle_idx<lenX-1)? delim: "\n");
+
+        }
+    }else{
+        outFile.open(fname+ext,std::ios_base::app);
+    }
+
+    outFile<<timestamp<<delim;
+
+    for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
+        outFile << X[particle_idx].x1() << delim;
+
+    }
+    for(int particle_idx = 0; particle_idx < lenX; particle_idx++){
+        outFile << X[particle_idx].x2() << ((particle_idx<lenX-1)? delim: "\n");
+
+    }
+
+
+    //close
+    if (Close){
+        outFile.close();
+    }
+    
 
 
 }

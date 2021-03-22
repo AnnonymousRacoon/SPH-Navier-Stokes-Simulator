@@ -26,6 +26,18 @@ double qij(tensor2<double> xi,tensor2<double> xj, const double& h);
 void scale_m(const int& lenX, double* Rho, const double& rho0, double& m);
 
 
+
+
+/**
+ * @brief Saves temp data into temp
+ * 
+ * @param lenX 
+ * @param X 
+ * @param timestamp 
+ * @param delim deliminator: " " or ",". Space separated values will output to .txt whilst Comma separated will output .csv
+ * @param New 
+ */
+void save_data(const int& lenX, tensor2<double>* X,const double& timestamp, const std::string& delim, const bool& New, const bool& Close);
 // --------------------------------------------------------------
 // --------------------------------------------------------------
 // --------------------------------------------------------------

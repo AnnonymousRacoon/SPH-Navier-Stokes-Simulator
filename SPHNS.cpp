@@ -65,6 +65,8 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
     std::cout<<"POSITIONS:\n";
     print_arr(len,X);
 
+    //SAVE DATA AND ADD HEAD
+    save_data(len,X,0.0,",",true,false);
 
 
     //-----------------------
@@ -78,13 +80,15 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
     std::cout<<"POSITIONS:\n";
     print_arr(len,X);
 
+    
+
 
 
     //-----------------------
     //       STEP 2
     //-----------------------
 
-    for(int t = 1; t<ntimesteps;t++){
+    for(int t = 2; t<ntimesteps;t++){
         Fill_Rho(len,X,Rho,m,h);
         Fill_P(len,X,Rho,P,k,rho0);
         Fill_Fp(len,X,P,Rho,Fp,m,h);
@@ -97,14 +101,18 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
         Tintegrate(len,A,X,V,step);
         EnforceBC(len,X,V,e,h);
         if(t%10000 == 0){
-            std::cout<<"\n\nt =  "<<t/10000<<"s"<<std::endl;
+            std::cout<<"\n\nt =  "<<t*step<<"s"<<std::endl;
             std::cout<<"VELOCITIES:\n";
             print_arr(len,V);
             std::cout<<"POSITIONS:\n";
             print_arr(len,X);
             std::cout<<"NET SCALED FORCE:\n";
             print_arr(len,A);
+
+            //SAVE DATA
+            save_data(len,X,t*step,",",false,false);
         }
+        
 
 
         //------------------
@@ -128,8 +136,11 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
         
 
     }
+    save_data(len,X,sim_time,",",false,true);
 
 }
+
+
 
 int main(){
 
