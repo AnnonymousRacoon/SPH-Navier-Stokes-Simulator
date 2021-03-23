@@ -5,6 +5,34 @@
 #include <string>
 
 
+
+
+
+
+
+
+// --------------------------------------------------------------
+//                       MPI
+// --------------------------------------------------------------
+std::tuple<int,int> segment_work(const int& length, const int& nslices, const int& rank){
+    int start;
+    int end;
+    
+    int switchpoint = length%nslices;
+    int small_chunk= (length - switchpoint)/nslices;
+    int big_chunk = small_chunk+1;
+
+    if (rank < switchpoint){
+        start = rank*big_chunk;
+        end = (rank+1)*big_chunk;
+    }else{
+        start = (rank-switchpoint)*small_chunk + switchpoint*big_chunk;
+        end = (rank+1-switchpoint)*small_chunk + switchpoint*big_chunk;
+    }
+
+    return {start,end};
+}
+
 // --------------------------------------------------------------
 //                       MISC
 // --------------------------------------------------------------
@@ -19,6 +47,10 @@ void scale_m(const int& lenX, double* Rho, const double& rho0, double& m){
         sum+=Rho[idx];
     }
     m = sqrt(rho0*double(lenX)/sum);
+
+    for (int idx = 0; idx< lenX; idx++){
+        Rho[idx]*=m;
+    }
 
 
 }

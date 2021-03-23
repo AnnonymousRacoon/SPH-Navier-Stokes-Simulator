@@ -2,15 +2,22 @@
 // -------------------------
 //         HEADERS
 // -------------------------
-
+#include <mpi.h>
 #include "fns.hpp"
 #include "tensor.cpp"
+#include<tuple>
 
 
 
 #include <iostream>
 #include <math.h>
 #include <iomanip>  
+
+// --------------------
+//    GLOBAL VARS
+// --------------------
+auto communicator = MPI_COMM_WORLD; // All processes
+//---------------------
 
 //-------------------------
 //       CONSTANTS
@@ -43,7 +50,7 @@ const int ntimesteps = int((sim_time+1)/step);
  */
 void Simulate(double* Rho, double* P, tensor2<double>* X,
                  tensor2<double>* V,tensor2<double>* Fp,
-                 tensor2<double>* Fv,tensor2<double>* Fg, tensor2<double>* A){
+                 tensor2<double>* Fv,tensor2<double>* Fg, tensor2<double>* A, const bool& verbose = false){
 
     //-----------------------
     //     INITIAL CONDITIONS
@@ -61,11 +68,13 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
     Fill_Fg(len,Rho,Fg,g);
     Fill_A(len,Fp,Fv,Fg,Rho,A);
 
-    std::cout<<"\nINITITIAL CONDITIONS\n";
-    std::cout<<"VELOCITIES:\n";
-    print_arr(len,V);
-    std::cout<<"POSITIONS:\n";
-    print_arr(len,X);
+    if(verbose){
+        std::cout<<"\nINITITIAL CONDITIONS\n";
+        std::cout<<"VELOCITIES:\n";
+        print_arr(len,V);
+        std::cout<<"POSITIONS:\n";
+        print_arr(len,X);
+    }
 
     //SAVE DATA AND ADD HEAD
     save_position(len,X,0.0,delim,true,false);
@@ -75,15 +84,18 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
     //-----------------------
     //       STEP 1
     //-----------------------
-    std::cout<<"\nINIT TSTEP\n";
+    
     Tintegrate_init(len,A,X,V,step);
     EnforceBC(len,X,V,e,h);
-    std::cout<<"VELOCITIES:\n";
-    print_arr(len,V);
-    std::cout<<"POSITIONS:\n";
-    print_arr(len,X);
-    std::cout<<"POTENTIAL ENERGY:\n";
-    std::cout<<Ep(len,X,m,g)<<std::endl;
+    if(verbose){
+        std::cout<<"\nINIT TSTEP\n";
+        std::cout<<"VELOCITIES:\n";
+        print_arr(len,V);
+        std::cout<<"POSITIONS:\n";
+        print_arr(len,X);
+        std::cout<<"POTENTIAL ENERGY:\n";
+        std::cout<<Ep(len,X,m,g)<<std::endl;
+    }
 
     // SAVE ENERGY AND ADD HEAD
     save_energy(Ek(len,V,m),Ep(len,X,m,g),step,delim,true,false);
@@ -116,17 +128,19 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
             save_energy(Ek(len,V,m),Ep(len,X,m,g),t*step,delim,false,false);
         }
         if(t%10000 == 0){
-            std::cout<<"\nt =  "<<t*step<<"s"<<std::endl;
-            std::cout<<"VELOCITIES:\n";
-            print_arr(len,V);
-            std::cout<<"POSITIONS:\n";
-            print_arr(len,X);
-            std::cout<<"NET SCALED FORCE:\n";
-            print_arr(len,A);
-            // std::cout<<"KINETIC ENERGY:\n";
-            // std::cout<<Ek(len,V,m)<<std::endl;
-            std::cout<<"POTENTIAL ENERGY:\n";
-            std::cout<<Ep(len,X,m,g)<<std::endl;
+            if (verbose){
+                std::cout<<"\nt =  "<<t*step<<"s"<<std::endl;
+                std::cout<<"VELOCITIES:\n";
+                print_arr(len,V);
+                std::cout<<"POSITIONS:\n";
+                print_arr(len,X);
+                // std::cout<<"NET SCALED FORCE:\n";
+                // print_arr(len,A);
+                // std::cout<<"KINETIC ENERGY:\n";
+                // std::cout<<Ek(len,V,m)<<std::endl;
+                std::cout<<"POTENTIAL ENERGY:\n";
+                std::cout<<Ep(len,X,m,g)<<std::endl;
+            }
 
             //SAVE DATA
             save_position(len,X,t*step,delim,false,false);
@@ -147,9 +161,32 @@ void Simulate(double* Rho, double* P, tensor2<double>* X,
 
 
 
-int main(){
+int main(int argc, char* argv[]){
 
-    std::cout<<"\n\n\n\n\n";
+    // ----------------------
+    // INITIALISE MPI
+    // ----------------------
+    int rank = 0;
+    int size = 0;
+    int confirmation = 0;
+
+    int err = MPI_Init (&argc, &argv);
+    if(err != MPI_SUCCESS){
+        std::cout<<"Error initialising MPI"<<std::endl;
+        return -1;
+    }
+
+    MPI_Comm_rank(communicator, &rank);
+    MPI_Comm_size(communicator, &size);
+
+    if(rank == 0){
+        std::cout<<"\n\n\n\n\n";
+        std::cout<<"MPI INIT SUCCESSFUL\nRUNNING ON "<<size<<" PROCESSES\n";
+        
+    }
+    MPI_Bcast(&confirmation, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    
 
     //-----------------------
     //     MEMORY ALLOC
@@ -198,7 +235,19 @@ int main(){
     //     SIM
     //-----------------------
 
-    Simulate(Rho,P,X,V,Fp,Fv,Fg,A);
+
+    //segment work
+    auto [start,end] = segment_work(len,size,rank);
+    std::cout<<"RANK "<<rank<<"\n SLICE: "<<start<<"-"<<end<<std::endl;
+
+    
+    if(rank == 0){
+        std::cout<<"RANK "<<rank<<" BUSY\n";
+        Simulate(Rho,P,X,V,Fp,Fv,Fg,A);
+        std::cout<<"RANK "<<rank<<" DONE\n";
+    }else{
+        std::cout<<"RANK "<<rank<<" IDLE\n";
+    }
 
     // ----------------
     //    TIDY UP
@@ -210,6 +259,12 @@ int main(){
     delete[] Fv;
     delete[] Fg;
     delete[] A;
+
+    //-----------------------
+    // CLOSE THREADS/PROCESSES
+    // -----------------------
+
+    MPI_Finalize();
     
 
 }

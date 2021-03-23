@@ -2,7 +2,24 @@
 #include "tensor.h"
 #include <iostream>
 #include <iomanip>  
+#include<tuple>
 
+
+
+
+
+
+
+
+/**
+ * @brief fetches the required interval for a segmented process
+ * 
+ * @param length total interval length
+ * @param nslices number of slices (processes)
+ * @param rank process rank
+ * @return std::tuple<int,int> 
+ */
+std::tuple<int,int> segment_work(const int& length, const int& nslices, const int& rank);
 
 
 /**
