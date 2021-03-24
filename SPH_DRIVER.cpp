@@ -14,20 +14,25 @@
 // ----------------------------
 int main(int argc, char** argv) {
 
-    int numparticles = 1;
+    
+    double* X = new double[5];
 
 
     MPI_Comm world = MPI_COMM_WORLD;
 
     SPH sph;
     sph.InitMPI(&argc,argv,world);
+    sph.set_delim(" ");
 
-    // int size = sph.size();
+  
+    // sph.Model_Block_Droplet(10);
 
-    double* X = new double[numparticles*2];
+    sph.Model_Droplet(100);
 
-    X[0] = 0.1;
-    X[1] = 0.99;
+
+    
+
+   
 
     // X[0] = 0.01;
     // X[10] = 0.011;
@@ -48,12 +53,14 @@ int main(int argc, char** argv) {
     // X[16] = 0.35;
     // X[17] = 0.25;
 
-    sph.Simulate_MC(1,X);
+    // sph.Val_Single_Particle();
+
+    // sph.Simulate_SC(1,X);
     // sph.Simulate_SC(7,X);
 
  
 
-    delete[] X;
+    
 
 
 
