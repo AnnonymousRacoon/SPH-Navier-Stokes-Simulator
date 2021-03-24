@@ -65,7 +65,6 @@ int main(int argc, char** argv) {
     // --------------------------//
     //           CLI             //
     // --------------------------//
-
     try {
 
         // allowed options
@@ -87,6 +86,7 @@ int main(int argc, char** argv) {
             ("n_particles",po::value<double>(), "Approximate number of particles to simulate.")
             ("delim",po::value<std::string>(), "sets the delimiter for output files. can be \",\" or \" \"")
             ("edit_multi", po::value<std::vector<std::string>>()->multitoken(),"change settings. takes two arguments $SETTING$ and $VALUE$. accepts multiple arguments\ne.g --edit dt 0.001 h 0.5")
+            ("restore_defaults", "restores default settings")
             
         ;
 
@@ -135,6 +135,7 @@ int main(int argc, char** argv) {
         //    save config    //
         // ------------------//
         if (vm.count("save_config_as")) {
+
             std::cout << "Saving compression to... "
                 << vm["save_config"].as<std::string>()<<".txt"<<std::endl;
             try{
@@ -284,6 +285,28 @@ int main(int argc, char** argv) {
             }
             return 0;
         }
+        
+        // ------------------//
+        // default settings  //
+        // ------------------//
+        if (vm.count("restore_defaults")) {
+            if(rank == 0){
+                config.g = 9.81;
+                config.mu = 1.0;
+                config.e = 0.5;
+                config.k = 2000.0;
+                config.rho0 = 1000.0;
+                config.h = 0.01;
+                config.step = 0.0001;
+                config.n_particles = 100;
+                config.max_sim_time = 100.00;
+                config.delim = " ";
+                save_Config(config,true);
+                std::cout<<"DEFAULT SETTINGS RESTORED\n";
+            }
+        }
+
+        
         // ------------------//
         //   edit config     //
         // ------------------//

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <iomanip>  
 #include <fstream>
+#include <sstream>
+#include <string>
 #include <time.h>
 #include <chrono>
 typedef std::chrono::high_resolution_clock Clock;
@@ -120,7 +122,8 @@ void SPH::Simulate_MC(const int& nParticles, double* Xp, const bool& keepXp){
         __save_position(nParticles,X,__step,__delim,true,false);
     }
 
-
+    std::string NRGdatabuff = "";//EnergyDataBuffer
+    std::ostringstream NRGos;//sstream
     for(int t = 2; t<__ntimesteps;t++){
         __Fill_Rho_MC(start,end,nParticles,X,RHO,buff,scalarbuffsize);
         __Fill_Fp_MC(start,end,nParticles,X,RHO,FP,buff,vectorbuffsize);
@@ -134,12 +137,25 @@ void SPH::Simulate_MC(const int& nParticles, double* Xp, const bool& keepXp){
         __Ek_MC(nParticles,V,Ek);
         __Ep_MC(nParticles,X,Ep);
 
+        if(__rank == 0){
+            NRGos << t*__step <<__delim <<Ek <<__delim << Ep <<std::endl;
+            NRGdatabuff += NRGos.str();
+            NRGos.str("");
+            
+        }
+        
+
+
         
         //SAVE STATES AT MICROSECOND INTERVALS
         if(t%100 == 0 and __rank == 0){
-            __save_energy(Ek,Ep,t*__step,__delim,false,false);
             __save_position(nParticles,X,t*__step,__delim,false,false);
+            __write_buff(NRGdatabuff,"energy");
+            NRGdatabuff = "";
+           
         }
+
+       
 
        
 
@@ -254,7 +270,8 @@ void SPH::Simulate_SC(const int& nParticles, double* Xp, const bool& keepXp){
     }
 
     
-
+    std::string NRGdatabuff = "";//EnergyDataBuffer
+    std::ostringstream NRGos;//sstream
     for(int t = 2; t<__ntimesteps;t++){
         __Fill_Rho_SC(nParticles,X,RHO);
         __Fill_Fp_SC(nParticles,X,RHO,FP);
@@ -270,12 +287,23 @@ void SPH::Simulate_SC(const int& nParticles, double* Xp, const bool& keepXp){
 
         
 
+        if(__rank == 0){
+            NRGos << t*__step <<__delim <<Ek <<__delim << Ep <<std::endl;
+            NRGdatabuff += NRGos.str();
+            NRGos.str("");
+            
+        }
+        
+
+
+        
         //SAVE STATES AT MICROSECOND INTERVALS
         if(t%100 == 0 and __rank == 0){
-            __save_energy(Ek,Ep,t*__step,__delim,false,false);
             __save_position(nParticles,X,t*__step,__delim,false,false);
+            __write_buff(NRGdatabuff,"energy");
+            NRGdatabuff = "";
+           
         }
-
 
         // BREAK EARLY IF AT REST AND SIM OVER 5s
         if( Ek <= nParticles*1.3485118e-07 and Ep <=nParticles*0.028 and t*__step > 5){
@@ -1138,6 +1166,25 @@ void SPH::__save_energy(const double& KE, const double& PE, const double& timest
     }
 }
 
+/**
+ * @brief appends string buffer to a file
+ * 
+ * @param buff buffer containing data
+ * @param fname filename
+ */
+void SPH::__write_buff(std::string& buff, const std::string& fname){
+    std::string ext = (__delim == ",")? ".csv" : ".txt";//file extension
+    std::ofstream File;//File object;
+
+    //OPEN FILE AND PARSE
+    File.open(fname+ext,std::ios_base::app);
+    File<<buff;
+    File.close();
+    buff = "";
+
+
+
+}
 // --------------------------------------------------------------
 //                       PARTICLE MODELLING
 // --------------------------------------------------------------

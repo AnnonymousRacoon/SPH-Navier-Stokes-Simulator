@@ -119,6 +119,7 @@ private:
 
     void __save_position(const int& lenX, double* X,const double& timestamp, const std::string& delim, const bool& Open, const bool& Close);
     void __save_energy(const double& KE, const double& PE, const double& timestamp, const std::string& delim, const bool& Open, const bool& Close);
+    void __write_buff(std::string& buff, const std::string& fname);
 
         
 public:
