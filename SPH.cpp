@@ -44,6 +44,7 @@ int SPH::InitMPI(int* argc,char** argv,MPI_Comm world){
  * 
  * @param nParticles the number of particles represented by the system
  * @param Xp array of initial positions of the particles. Formatted using row-major monvention (e.g [X1,Y1,X2,Y2......Xn,Yn])
+ * @param KeepXp Boolean value indicating whether to make a copy of Xp rather than overwrite
  */
 void SPH::Simulate_MC(const int& nParticles, double* Xp, const bool& keepXp){
 
@@ -181,6 +182,7 @@ void SPH::Simulate_MC(const int& nParticles, double* Xp, const bool& keepXp){
  * 
  * @param nParticles the number of particles represented by the system
  * @param Xp array of initial positions of the particles. Formatted using row-major monvention (e.g [X1,Y1,X2,Y2......Xn,Yn])
+ * @param KeepXp Boolean value indicating whether to make a copy of Xp rather than overwrite
  */
 void SPH::Simulate_SC(const int& nParticles, double* Xp, const bool& keepXp){
 
@@ -394,8 +396,6 @@ std::tuple<int,int> SPH::__segment_work(const int& lenX){
  * @param Pyj y component of P_j
  * @return double 
  */
-
-
 double SPH::__phi_dij(const double& Pxi, const double& Pyi, const double& Pxj, const double& Pyj){
     double q = __qij(Pxi-Pxj,Pyi-Pyj);
     if (q >=1.0){
@@ -905,8 +905,6 @@ void SPH::__Tintegrate(const int& lenX, double* A, double* X, double* V,const bo
 }
 
 
-
-
 /**
  * @brief Enforce boundary Conditions
  * 
@@ -1155,6 +1153,12 @@ void SPH::Val_Single_Particle(){
     //PLACE PARTICLES
     Xbuff[0] = 0.5;
     Xbuff[1] = 0.5;
+
+    //SIMULATE
+    if(__rank == 0){
+        std::cout<<"RUNNING 1 PARTICLE VALIDATION ROUTINE\n";
+    }
+
     Simulate_SC(1,Xbuff,false);
 }
 
@@ -1169,6 +1173,11 @@ void SPH::Val_Two_Particles(){
     Xbuff[1] = 0.5;
     Xbuff[2] = 0.5;
     Xbuff[3] = __h;
+
+    //SIMULATE
+    if(__rank == 0){
+        std::cout<<"RUNNING 2 PARTICLE VALIDATION ROUTINE\n";
+    }
     Simulate_SC(2,Xbuff,false);
 
 }
@@ -1188,6 +1197,11 @@ void SPH::Val_Four_Particles(){
     Xbuff[5] = 0.45;
     Xbuff[6] = 0.5;
     Xbuff[7] = 0.45;
+
+    //SIMULATE
+    if(__rank == 0){
+        std::cout<<"RUNNING 4 PARTICLE VALIDATION ROUTINE\n";
+    }
     Simulate_SC(4,Xbuff,false);
 
 }
@@ -1211,7 +1225,9 @@ void SPH::Model_Damn_Break(const int& resolution, const double & noise_amplitude
 
     //BROADCAST TO OTHER RANKS
     MPI_Bcast(Xbuff, buffsize, MPI_DOUBLE, 0, __world);
-   
+    if(__rank == 0){
+        std::cout<<"RUNNING DAM BREAK ROUTINE\n";
+    }
     //SIMULATE USING MULTIPLE CORES
     Simulate_MC(buffsize/2,Xbuff,false);
 
@@ -1237,8 +1253,11 @@ void SPH::Model_Block_Droplet(const int& resolution, const double & noise_amplit
 
     //BROADCAST TO OTHER RANKS
     MPI_Bcast(Xbuff, buffsize, MPI_DOUBLE, 0, __world);
-   
+    
     //SIMULATE USING MULTIPLE CORES
+    if(__rank == 0){
+        std::cout<<"RUNNING BLOCK DROPLET ROUTINE\n";
+    }
     Simulate_MC(buffsize/2,Xbuff,false);
 
 
@@ -1262,8 +1281,11 @@ void SPH::Model_Droplet(const int& nParticles){
 
     //BROADCAST TO OTHER RANKS
     MPI_Bcast(Xbuff, buffsize, MPI_DOUBLE, 0, __world);
-   
+    
     //SIMULATE USING MULTIPLE CORES
+    if(__rank == 0){
+        std::cout<<"RUNNING DROPLET ROUTINE\n";
+    }
     Simulate_MC(buffsize/2,Xbuff,false);
 
 }
